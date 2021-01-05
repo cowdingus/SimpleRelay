@@ -1,6 +1,6 @@
 #include "TimedAction.hpp"
 
-TimedAction::TimedAction(unsigned long intervalMillis, TimedAction::Callback callback)
+TimedAction::TimedAction(unsigned long intervalMillis, Callback* callback)
   : intervalDuration(intervalMillis), actionCallback(callback)
 {
   
@@ -22,10 +22,10 @@ void TimedAction::update(unsigned long deltaTime)
     if (active)
     {
       if (actionCallback)
-        actionCallback();
+        actionCallback->invoke();
     
       if (actionCompleteCallback)
-        actionCompleteCallback();
+        actionCompleteCallback->invoke();
     }
   }
 }
@@ -50,7 +50,7 @@ bool TimedAction::isActive() const
   return active;
 }
 
-void TimedAction::attachActionCallback(Callback callback)
+void TimedAction::attachActionCallback(Callback* callback)
 {
   actionCallback = callback;
 }
@@ -60,7 +60,7 @@ void TimedAction::detachActionCallback()
   actionCallback = nullptr;
 }
 
-void TimedAction::attachActionCompleteCallback(Callback callback)
+void TimedAction::attachActionCompleteCallback(Callback* callback)
 {
   actionCompleteCallback = callback;
 }

@@ -1,11 +1,11 @@
 #pragma once
 
+#include "Callback.hpp"
+
 class TimedAction
 {
 public:
-  typedef void (*Callback)();
-
-  TimedAction(unsigned long intervalMillis, Callback callback);
+  TimedAction(unsigned long intervalMillis, Callback* callback);
   TimedAction();
 
   void update(unsigned long deltaTime);
@@ -16,10 +16,10 @@ public:
   void setActive(bool active);
   bool isActive() const;
 
-  void attachActionCallback(Callback callback);
+  void attachActionCallback(Callback* callback);
   void detachActionCallback();
 
-  void attachActionCompleteCallback(Callback callback);
+  void attachActionCompleteCallback(Callback* callback);
   void detachActionCompleteCallback();
 
 private:
@@ -28,6 +28,6 @@ private:
 
   bool active = true;
 
-  Callback actionCallback = nullptr;
-  Callback actionCompleteCallback = nullptr;
+  Callback* actionCallback = nullptr;
+  Callback* actionCompleteCallback = nullptr;
 };
