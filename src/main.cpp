@@ -1,6 +1,10 @@
 #include "Relay.hpp"
 #include "TimedAction.hpp"
+
 #include "Tasks/NormalTask.hpp"
+#include "Tasks/IdleTask.hpp"
+
+#include <Wire.h>
 
 #include <Arduino.h>
 
@@ -14,17 +18,48 @@ unsigned long time = 0;
 unsigned long deltaTime = time - previousTime;
 
 NormalTask normalTask(relay1, relay2);
+IdleTask idleTask;
+
+String currentTask = "Idle";
 
 void setup() 
 {
   Serial.begin(9600);
 }
 
+void processInput()
+{
+  String input = Serial.readStringUntil('(');
+
+  if (input.equals("setTask"))
+  {
+    String taskName = Serial.readStringUntil(')');
+
+    if (taskName.equalsIgnoreCase("Normal"))
+      currentTask = "Normal";
+    else if (taskName.equalsIgnoreCase
+    ("Idle"))
+      currentTask = "Idle";
+    else
+      Serial.println("No such registered task \'" + taskName + "\'");
+  }
+}
+
+void executeCurrentTask()
+{
+  if (currentTask.equals("Normal"))
+    normalTask.run(deltaTime);
+  else if (currentTask.equals("Idle"))
+    idleTask.run(deltaTime);
+  else
+    idleTask.run(deltaTime);
+}
+
 void loop()
 {
   updateDeltaTime();
-
-  normalTask.run(deltaTime);
+  processInput();
+  executeCurrentTask();
 }
 
 void updateDeltaTime()
