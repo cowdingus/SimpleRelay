@@ -7,5 +7,5 @@ class IdleTask : public Task
 public:
   IdleTask();
 
-  void run(unsigned long deltaTime);
+  void run();
 };
