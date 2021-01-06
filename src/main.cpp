@@ -7,7 +7,10 @@
 #include <Wire.h>
 
 #include <Arduino.h>
-#include <avr8-stub.h>
+
+#ifdef DEBUG
+  #include <avr8-stub.h>
+#endif
 
 void updateDeltaTime();
 
@@ -25,12 +28,16 @@ String currentTask = "Idle";
 
 void setup() 
 {
-  debug_init();
+  #ifdef DEBUG
+  d #ifdef DEBUGebug_init();
+  #else
   Serial.begin(9600);
+  #endif
 }
 
 void processInput()
 {
+  #ifndef DEBUG
   String input = Serial.readStringUntil('(');
 
   if (input.equals("setTask"))
@@ -39,12 +46,12 @@ void processInput()
 
     if (taskName.equalsIgnoreCase("Normal"))
       currentTask = "Normal";
-    else if (taskName.equalsIgnoreCase
-    ("Idle"))
+    else if (taskName.equalsIgnoreCase("Idle"))
       currentTask = "Idle";
     else
       Serial.println("No such registered task \'" + taskName + "\'");
   }
+  #endif
 }
 
 void executeCurrentTask()
