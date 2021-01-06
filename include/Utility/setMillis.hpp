@@ -1,5 +1,5 @@
 #pragma once
 
-#include <stddef.h>
+#include <stdint.h>
 
 void setMillis(uint32_t ms);
