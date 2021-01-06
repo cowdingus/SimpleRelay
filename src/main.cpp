@@ -12,14 +12,8 @@
   #include <avr8-stub.h>
 #endif
 
-void updateDeltaTime();
-
 Relay relay1(2);
 Relay relay2(4);
-
-unsigned long previousTime = 0;
-unsigned long time = 0;
-unsigned long deltaTime = time - previousTime;
 
 NormalTask normalTask(relay1, relay2);
 IdleTask idleTask;
@@ -29,7 +23,7 @@ String currentTask = "Idle";
 void setup() 
 {
   #ifdef DEBUG
-  d #ifdef DEBUGebug_init();
+  debug_init();
   #else
   Serial.begin(9600);
   #endif
@@ -57,23 +51,15 @@ void processInput()
 void executeCurrentTask()
 {
   if (currentTask.equals("Normal"))
-    normalTask.run(deltaTime);
+    normalTask.run();
   else if (currentTask.equals("Idle"))
-    idleTask.run(deltaTime);
+    idleTask.run();
   else
-    idleTask.run(deltaTime);
+    idleTask.run();
 }
 
 void loop()
 {
-  updateDeltaTime();
   processInput();
   executeCurrentTask();
-}
-
-void updateDeltaTime()
-{
-  previousTime = time;
-  time = millis();
-  deltaTime = time - previousTime;
 }
