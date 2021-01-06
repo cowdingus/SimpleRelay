@@ -7,6 +7,7 @@
 #include <Wire.h>
 
 #include <Arduino.h>
+#include <avr8-stub.h>
 
 void updateDeltaTime();
 
@@ -24,6 +25,7 @@ String currentTask = "Idle";
 
 void setup() 
 {
+  debug_init();
   Serial.begin(9600);
 }
 
