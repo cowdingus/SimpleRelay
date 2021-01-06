@@ -2,16 +2,20 @@
 
 #include "Callback.hpp"
 
+#include <Arduino.h>
+
+#include <stdint.h>
+
 class TimedAction
 {
 public:
-  TimedAction(unsigned long intervalMillis, Callback* callback);
+  TimedAction(uint32_t intervalMillis, Callback* callback);
   TimedAction();
 
-  void update(unsigned long deltaTime);
+  void update();
 
-  void setIntervalDuration(unsigned long intervalMillis);
-  unsigned long getIntervalDuration() const;
+  void setIntervalDuration(uint32_t intervalMillis);
+  uint32_t getIntervalDuration() const;
 
   void setActive(bool active);
   bool isActive() const;
@@ -23,8 +27,8 @@ public:
   void detachActionCompleteCallback();
 
 private:
-  unsigned long timeElapsed = 0;
-  unsigned long intervalDuration = 100000;
+  uint32_t intervalDuration = 100000;
+  uint32_t lastActionCompleteTime = millis();
 
   bool active = true;
 
