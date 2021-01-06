@@ -9,12 +9,12 @@
 class TimedAction
 {
 public:
-  TimedAction(uint32_t intervalMillis, Callback* callback);
+  TimedAction(uint32_t intervalms, Callback* callback);
   TimedAction();
 
   void update();
 
-  void setIntervalDuration(uint32_t intervalMillis);
+  void setIntervalDuration(uint32_t intervalms);
   uint32_t getIntervalDuration() const;
 
   void setActive(bool active);

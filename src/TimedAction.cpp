@@ -1,7 +1,7 @@
 #include "TimedAction.hpp"
 
-TimedAction::TimedAction(uint32_t intervalMillis, Callback* callback)
-  : intervalDuration(intervalMillis), actionCallback(callback)
+TimedAction::TimedAction(uint32_t intervalms, Callback* callback)
+  : intervalDuration(intervalms), actionCallback(callback)
 {
   
 }
@@ -20,17 +20,23 @@ void TimedAction::update()
   {
     lastActionCompleteTime = currentTime;
 
-    if (actionCallback)
-      actionCallback->invoke();
-    
-    if (actionCompleteCallback)
-      actionCompleteCallback->invoke();
+    if (active)
+    {
+      if (actionCallback)
+        actionCallback->invoke();
+      
+      if (actionCompleteCallback)
+        actionCompleteCallback->invoke();
+    }
   }
 }
 
-void TimedAction::setIntervalDuration(uint32_t intervalMillis)
+void TimedAction::setIntervalDuration(uint32_t intervalms)
 {
-  intervalDuration = intervalMillis;
+  // Resets the last action complete time
+  // so that the first iteration after this still result in `intervalms` amount of time
+  lastActionCompleteTime = millis();
+  intervalDuration = intervalms;
 }
 
 uint32_t TimedAction::getIntervalDuration() const
