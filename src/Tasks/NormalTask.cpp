@@ -21,10 +21,10 @@ NormalTask::NormalTask(Relay& relay1, Relay& relay2)
   relay2Action.setActive(true);
 }
 
-void NormalTask::run(unsigned long deltaTime)
+void NormalTask::run()
 {
-  relay1Action.update(deltaTime);
-  relay2Action.update(deltaTime);
+  relay1Action.update();
+  relay2Action.update();
 }
 
 NormalTask::CToggleRelay::CToggleRelay(Relay& relay)
