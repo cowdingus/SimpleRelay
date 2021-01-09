@@ -27,11 +27,7 @@ void TimedAction::update(uint32_t deltaTime)
     }
     else
     {
-      #ifdef TA_ACCURATE
       timeElapsed = timeElapsed % executionInterval;
-      #else
-      resetClock();
-      #endif
     }
     
     if (active && actionCallback)
