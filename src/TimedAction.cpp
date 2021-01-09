@@ -1,47 +1,58 @@
 #include "TimedAction.hpp"
 
-TimedAction::TimedAction(uint32_t intervalms, Callback* callback)
-  : intervalDuration(intervalms), actionCallback(callback)
+#include <assert.h>
+
+TimedAction::TimedAction(Callback* callback, uint32_t intervalms, bool overtimeCompensation)
 {
-  
+  setInterval(intervalms);
+  setAction(callback);
+  setOvertimeCompensation(overtimeCompensation);
 }
 
 TimedAction::TimedAction()
-  : active(false)
 {
-  
+  setActive(false);
 }
 
-void TimedAction::update()
+void TimedAction::update(uint32_t deltaTime)
 {
-  uint32_t currentTime = millis();
+  timeElapsed += deltaTime;
 
-  if (currentTime - lastActionCompleteTime >= intervalDuration)
+  while (timeElapsed >= executionInterval)
   {
-    lastActionCompleteTime = currentTime;
-
-    if (active)
+    // If callback invocation is ignored there's no need to do overtime compensation
+    if (overtimeCompensation && active)
     {
-      if (actionCallback)
-        actionCallback->invoke();
-      
-      if (actionCompleteCallback)
-        actionCompleteCallback->invoke();
+      timeElapsed -= executionInterval;
     }
+    else
+    {
+      #ifdef TA_ACCURATE
+      timeElapsed = timeElapsed % executionInterval;
+      #else
+      resetClock();
+      #endif
+    }
+    
+    if (active && actionCallback)
+      actionCallback->invoke();
   }
 }
 
-void TimedAction::setIntervalDuration(uint32_t intervalms)
+void TimedAction::resetClock()
 {
-  // Resets the last action complete time
-  // so that the first iteration after this still result in `intervalms` amount of time
-  lastActionCompleteTime = millis();
-  intervalDuration = intervalms;
+  timeElapsed = 0;
 }
 
-uint32_t TimedAction::getIntervalDuration() const
+void TimedAction::setInterval(uint32_t intervalms)
 {
-  return intervalDuration;
+  assert(intervalms > TA_MINIMUM_INTERVAL && "Interval must be more than TA_MINIMUM_INTERVAL");
+  executionInterval = intervalms;
+}
+
+uint32_t TimedAction::getInterval() const
+{
+  return executionInterval;
 }
 
 void TimedAction::setActive(bool active)
@@ -54,22 +65,12 @@ bool TimedAction::isActive() const
   return active;
 }
 
-void TimedAction::attachActionCallback(Callback* callback)
+void TimedAction::setAction(Callback* callback)
 {
   actionCallback = callback;
 }
 
-void TimedAction::detachActionCallback()
+void TimedAction::setOvertimeCompensation(bool compensation)
 {
-  actionCallback = nullptr;
-}
-
-void TimedAction::attachActionCompleteCallback(Callback* callback)
-{
-  actionCompleteCallback = callback;
-}
-
-void TimedAction::detachActionCompleteCallback()
-{
-  actionCompleteCallback = nullptr;
+  overtimeCompensation = compensation;
 }

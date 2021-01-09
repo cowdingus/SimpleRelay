@@ -3,35 +3,35 @@
 #include "Callback.hpp"
 
 #include <Arduino.h>
-
 #include <stdint.h>
+
+#define TA_MINIMUM_INTERVAL 25
 
 class TimedAction
 {
 public:
-  TimedAction(uint32_t intervalms, Callback* callback);
+  TimedAction(Callback* callback, uint32_t intervalms, bool overtimeCompensation = true);
   TimedAction();
 
-  void update();
+  void update(uint32_t elapsedTime);
+  void resetClock();
 
-  void setIntervalDuration(uint32_t intervalms);
-  uint32_t getIntervalDuration() const;
+  void setInterval(uint32_t intervalms);
+  uint32_t getInterval() const;
 
   void setActive(bool active);
   bool isActive() const;
 
-  void attachActionCallback(Callback* callback);
-  void detachActionCallback();
+  void setAction(Callback* callback);
 
-  void attachActionCompleteCallback(Callback* callback);
-  void detachActionCompleteCallback();
+  void setOvertimeCompensation(bool compensation);
 
 private:
-  uint32_t intervalDuration = 100000;
-  uint32_t lastActionCompleteTime = millis();
+  uint32_t executionInterval = 1000;
+  uint32_t timeElapsed = 0;
 
   bool active = true;
+  bool overtimeCompensation = true;
 
   Callback* actionCallback = nullptr;
-  Callback* actionCompleteCallback = nullptr;
 };
