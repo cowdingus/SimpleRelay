@@ -11,7 +11,7 @@ class NormalTask : public Task
 public:
   NormalTask(Relay& relay1, Relay& relay2);
 
-  void run();
+  void run(uint32_t deltaTime);
 
 private:
   class CToggleRelay : public Callback
@@ -25,12 +25,12 @@ private:
     Relay& relay;
   };
 
-  TimedAction relay1Action;
-  TimedAction relay2Action;
+  TimedAction relay1TimedAction;
+  TimedAction relay2TimedAction;
 
   Relay& relay1;
   Relay& relay2;
 
-  CToggleRelay actionCallback1;
-  CToggleRelay actionCallback2;
+  CToggleRelay toggleRelay1;
+  CToggleRelay toggleRelay2;
 };

@@ -8,23 +8,23 @@ NormalTask::NormalTask(Relay& relay1, Relay& relay2)
   Task("Normal"),
   relay1(relay1),
   relay2(relay2),
-  actionCallback1(relay1),
-  actionCallback2(relay2)
+  toggleRelay1(relay1),
+  toggleRelay2(relay2)
 {
-  relay1Action.setIntervalDuration(1000);
-  relay1Action.attachActionCallback(&actionCallback1);
+  relay1TimedAction.setInterval(1000);
+  relay1TimedAction.setAction(&toggleRelay1);
 
-  relay2Action.setIntervalDuration(1000);
-  relay2Action.attachActionCallback(&actionCallback2);
+  relay2TimedAction.setInterval(1000);
+  relay2TimedAction.setAction(&toggleRelay2);
 
-  relay1Action.setActive(true);
-  relay2Action.setActive(true);
+  relay1TimedAction.setActive(true);
+  relay2TimedAction.setActive(true);
 }
 
-void NormalTask::run()
+void NormalTask::run(uint32_t deltaTime)
 {
-  relay1Action.update();
-  relay2Action.update();
+  relay1TimedAction.update(deltaTime);
+  relay2TimedAction.update(deltaTime);
 }
 
 NormalTask::CToggleRelay::CToggleRelay(Relay& relay)
