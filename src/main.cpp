@@ -1,5 +1,18 @@
+#ifndef DEBUG
 #define __ASSERT_USE_STDERR
 #include <assert.h>
+
+void __assert(const char *__func, const char *__file, int __lineno, const char *__sexp) {
+    // transmit diagnostic informations through serial link.
+    Serial.println(__func);
+    Serial.println(__file);
+    Serial.println(__lineno, DEC);
+    Serial.println(__sexp);
+    Serial.flush();
+    // abort program execution.
+    abort();
+}
+#endif
 
 #include "Relay.hpp"
 #include "TimedAction.hpp"
@@ -12,21 +25,9 @@
 
 #include <Arduino.h>
 
-void __assert(const char *__func, const char *__file, int __lineno, const char *__sexp) {
-    // transmit diagnostic informations through serial link.
-    Serial.println(__func);
-    Serial.println(__file);
-    Serial.println(__lineno, DEC);
-    Serial.println(__sexp);
-    Serial.flush();
-    // abort program execution.
-    abort();
-}
-
 #ifdef DEBUG
   #include <avr8-stub.h>
 #endif
-
 
 Relay relay1(2);
 Relay relay2(4);
@@ -43,10 +44,10 @@ uint32_t deltaTime = timeNow - previousTime;
 
 void setup() 
 {
-  #ifdef DEBUG
-  debug_init();
-  #else
+  #ifndef DEBUG
   Serial.begin(9600);
+  #else
+  debug_init();
   #endif
   
   pinMode(6, OUTPUT);
