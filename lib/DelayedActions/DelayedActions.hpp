@@ -39,7 +39,7 @@ private:
 
   size_t nextAction = 0;
 
-  __attribute_warn_unused_result__ size_t findNextValidAction(size_t index) const;
+  size_t findNextValidAction(size_t index) const __attribute_warn_unused_result__;
 
   uint32_t timeElapsed = 0;
 };
