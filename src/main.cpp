@@ -1,5 +1,19 @@
-#ifndef DEBUG
-#define __ASSERT_USE_STDERR
+#if !defined(DEBUG) && !defined(UNIT_TEST)
+  #define __ASSERT_USE_STDERR
+#endif
+
+#include "Relay.hpp"
+#include "TimedAction.hpp"
+
+#include "Tasks/NormalTask.hpp"
+#include "Tasks/IdleTask.hpp"
+#include "Tasks/DATestTask.hpp"
+
+#include "Utility/setMillis.hpp"
+
+#include <Arduino.h>
+
+#if !defined(DEBUG) && !defined(UNIT_TEST)
 #include <assert.h>
 
 void __assert(const char *__func, const char *__file, int __lineno, const char *__sexp) {
@@ -13,17 +27,6 @@ void __assert(const char *__func, const char *__file, int __lineno, const char *
     abort();
 }
 #endif
-
-#include "Relay.hpp"
-#include "TimedAction.hpp"
-
-#include "Tasks/NormalTask.hpp"
-#include "Tasks/IdleTask.hpp"
-#include "Tasks/DATestTask.hpp"
-
-#include "Utility/setMillis.hpp"
-
-#include <Arduino.h>
 
 #ifdef DEBUG
   #include <avr8-stub.h>
@@ -44,19 +47,20 @@ uint32_t deltaTime = timeNow - previousTime;
 
 void setup() 
 {
-  #ifndef DEBUG
+  #if !defined(DEBUG) && !defined(UNIT_TEST)
   Serial.begin(9600);
-  #else
-  debug_init();
   #endif
   
+  #ifdef DEBUG
+  debug_init();
+  #endif
+
   pinMode(6, OUTPUT);
-  digitalWrite(6, HIGH);
 }
 
 void processInput()
 {
-  #ifndef DEBUG
+  #if !defined(DEBUG) && !defined(UNIT_TEST)
   String input = Serial.readStringUntil('(');
 
   if (input.equals("setTask"))

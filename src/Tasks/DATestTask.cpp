@@ -8,7 +8,7 @@ DATestTask::DATestTask(Relay& relay, uint16_t ledPin)
   :
   Task("DATest"),
   cToggleRelay(relay),
-  cToggleLed(ledPin, 1)
+  cToggleLed(ledPin)
 {
   delayedActions.setAction(&cToggleLed, 0, 0);
   delayedActions.setAction(&cToggleLed, 200, 1);
