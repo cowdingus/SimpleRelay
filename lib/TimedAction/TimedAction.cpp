@@ -1,5 +1,9 @@
 #include "TimedAction.hpp"
 
+#if !defined(DEBUG) && !defined(UNIT_TEST)
+  #define __ASSERT_USE_STDERR
+#endif
+
 #include <assert.h>
 
 TimedAction::TimedAction(Callback* callback, uint32_t intervalms, bool overtimeCompensation)
@@ -66,7 +70,17 @@ void TimedAction::setAction(Callback* callback)
   actionCallback = callback;
 }
 
+Callback* TimedAction::getAction() const
+{
+  return actionCallback;
+}
+
 void TimedAction::setOvertimeCompensation(bool compensation)
 {
   overtimeCompensation = compensation;
+}
+
+bool TimedAction::getOvertimeCompensation() const
+{
+  return overtimeCompensation;
 }

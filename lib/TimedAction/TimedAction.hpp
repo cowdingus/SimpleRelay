@@ -2,7 +2,6 @@
 
 #include "Callback.hpp"
 
-#include <Arduino.h>
 #include <stdint.h>
 
 #define TA_MINIMUM_INTERVAL 25
@@ -23,8 +22,10 @@ public:
   bool isActive() const;
 
   void setAction(Callback* callback);
+  Callback* getAction() const;
 
   void setOvertimeCompensation(bool compensation);
+  bool getOvertimeCompensation() const;
 
 private:
   uint32_t executionInterval = 1000;

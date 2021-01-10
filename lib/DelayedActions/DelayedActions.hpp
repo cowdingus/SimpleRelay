@@ -1,10 +1,15 @@
 #pragma once
 
-#include "Callback.hpp"
-
 #include <stddef.h>
 #include <stdint.h>
+
+#if !defined(DEBUG) && !defined(UNIT_TEST)
+  #define __ASSERT_USE_STDERR
+#endif
+
 #include <assert.h>
+
+#include "Callback.hpp"
 
 template<size_t actionsCount>
 class DelayedActions
@@ -34,7 +39,7 @@ private:
 
   size_t nextAction = 0;
 
-  size_t findNextValidAction(size_t index) const;
+  __attribute_warn_unused_result__ size_t findNextValidAction(size_t index) const;
 
   uint32_t timeElapsed = 0;
 };
@@ -50,12 +55,17 @@ void DelayedActions<actionsCount>::update(uint32_t deltaTime)
 {
   if (isEmpty()) return;
 
+  // Go directly to least valid action when current is not valid
+  if (!actions[nextAction])
+    nextAction = findNextValidAction(nextAction);
+
   timeElapsed += deltaTime;
 
   while (timeElapsed >= actionsDelay[nextAction])
   {
     timeElapsed -= actionsDelay[nextAction];
 
+    assert(actions[nextAction] && "Reached impossible state, unexpected: callback is nullptr");
     actions[nextAction]->invoke();
 
     nextAction = findNextValidAction(nextAction);
@@ -79,7 +89,7 @@ void DelayedActions<actionsCount>::removeAction(size_t index)
   actions[index] = nullptr;
 
   if (nextAction == index)
-    nextAction = findNextValidAction();
+    nextAction = findNextValidAction(index);
 }
 
 template<size_t actionsCount>
