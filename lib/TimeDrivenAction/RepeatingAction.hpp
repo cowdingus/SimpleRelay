@@ -4,13 +4,13 @@
 
 #include <stdint.h>
 
-#define TA_MINIMUM_INTERVAL 25
+#define RA_MINIMUM_INTERVAL 25
 
-class TimedAction
+class RepeatingAction
 {
 public:
-  TimedAction(Callback* callback, uint32_t intervalms, bool overtimeCompensation = true);
-  TimedAction();
+  RepeatingAction(Callback* callback, uint32_t intervalms, bool overtimeCompensation = true);
+  RepeatingAction();
 
   void update(uint32_t elapsedTime);
   void resetClock();

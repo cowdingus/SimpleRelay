@@ -1,4 +1,4 @@
-#include "TimedAction.hpp"
+#include "RepeatingAction.hpp"
 
 #if !defined(DEBUG) && !defined(UNIT_TEST)
   #define __ASSERT_USE_STDERR
@@ -12,19 +12,19 @@
 
 #include <assert.h>
 
-TimedAction::TimedAction(Callback* callback, uint32_t intervalms, bool overtimeCompensation)
+RepeatingAction::RepeatingAction(Callback* callback, uint32_t intervalms, bool overtimeCompensation)
 {
   setInterval(intervalms);
   setAction(callback);
   setOvertimeCompensation(overtimeCompensation);
 }
 
-TimedAction::TimedAction()
+RepeatingAction::RepeatingAction()
 {
   setActive(false);
 }
 
-void TimedAction::update(uint32_t deltaTime)
+void RepeatingAction::update(uint32_t deltaTime)
 {
   timeElapsed += deltaTime;
 
@@ -45,48 +45,48 @@ void TimedAction::update(uint32_t deltaTime)
   }
 }
 
-void TimedAction::resetClock()
+void RepeatingAction::resetClock()
 {
   timeElapsed = 0;
 }
 
-void TimedAction::setInterval(uint32_t intervalms)
+void RepeatingAction::setInterval(uint32_t intervalms)
 {
-  assert(intervalms > TA_MINIMUM_INTERVAL && F("Interval must be more than TA_MINIMUM_INTERVAL"));
+  assert(intervalms > RA_MINIMUM_INTERVAL && F("Interval must be more than TA_MINIMUM_INTERVAL"));
   executionInterval = intervalms;
 }
 
-uint32_t TimedAction::getInterval() const
+uint32_t RepeatingAction::getInterval() const
 {
   return executionInterval;
 }
 
-void TimedAction::setActive(bool active)
+void RepeatingAction::setActive(bool active)
 {
   this->active = active;
 }
 
-bool TimedAction::isActive() const
+bool RepeatingAction::isActive() const
 {
   return active;
 }
 
-void TimedAction::setAction(Callback* callback)
+void RepeatingAction::setAction(Callback* callback)
 {
   actionCallback = callback;
 }
 
-Callback* TimedAction::getAction() const
+Callback* RepeatingAction::getAction() const
 {
   return actionCallback;
 }
 
-void TimedAction::setOvertimeCompensation(bool compensation)
+void RepeatingAction::setOvertimeCompensation(bool compensation)
 {
   overtimeCompensation = compensation;
 }
 
-bool TimedAction::getOvertimeCompensation() const
+bool RepeatingAction::getOvertimeCompensation() const
 {
   return overtimeCompensation;
 }
