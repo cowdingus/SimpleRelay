@@ -4,6 +4,12 @@
   #define __ASSERT_USE_STDERR
 #endif
 
+#ifdef NATIVE_UNIT_TEST
+  #define F(x) x
+#else
+  #include <WString.h>
+#endif
+
 #include <assert.h>
 
 TimedAction::TimedAction(Callback* callback, uint32_t intervalms, bool overtimeCompensation)
@@ -46,7 +52,7 @@ void TimedAction::resetClock()
 
 void TimedAction::setInterval(uint32_t intervalms)
 {
-  assert(intervalms > TA_MINIMUM_INTERVAL && "Interval must be more than TA_MINIMUM_INTERVAL");
+  assert(intervalms > TA_MINIMUM_INTERVAL && F("Interval must be more than TA_MINIMUM_INTERVAL"));
   executionInterval = intervalms;
 }
 
