@@ -1,19 +1,20 @@
-#if !defined(DEBUG) && !defined(UNIT_TEST)
+#define SERIAL_ALLOWED !defined(DEBUG) && !defined(UNIT_TEST)
+
+#if SERIAL_ALLOWED
   #define __ASSERT_USE_STDERR
 #endif
 
-#include "Relay.hpp"
-#include "TimedAction.hpp"
+#include "RepeatingAction.hpp"
 
-#include "Tasks/NormalTask.hpp"
 #include "Tasks/IdleTask.hpp"
 #include "Tasks/DATestTask.hpp"
 
-#include "Utility/setMillis.hpp"
+#include <Wire.h>
+#include <RTClib.h>
 
 #include <Arduino.h>
 
-#if !defined(DEBUG) && !defined(UNIT_TEST)
+#if SERIAL_ALLOWED
 #include <assert.h>
 
 void __assert(const char *__func, const char *__file, int __lineno, const char *__sexp) {
@@ -32,12 +33,8 @@ void __assert(const char *__func, const char *__file, int __lineno, const char *
   #include <avr8-stub.h>
 #endif
 
-Relay relay1(2);
-Relay relay2(4);
-
-NormalTask normalTask(relay1, relay2);
 IdleTask idleTask;
-DATestTask daTestTask(relay2, 6);
+DATestTask daTestTask(4, 6);
 
 String currentTask = "DATest";
 
@@ -45,9 +42,11 @@ uint32_t previousTime = 0;
 uint32_t timeNow = 0;
 uint32_t deltaTime = timeNow - previousTime;
 
+RTC_DS3231 rtc;
+
 void setup() 
 {
-  #if !defined(DEBUG) && !defined(UNIT_TEST)
+  #if SERIAL_ALLOWED
   Serial.begin(9600);
   #endif
   
@@ -55,35 +54,49 @@ void setup()
   debug_init();
   #endif
 
+  Wire.begin();
+  
+  if (!rtc.begin())
+  {
+  #if SERIAL_ALLOWED
+    Serial.println("Failed to begin connection with RTC_DS3231");
+  #endif
+  }
+
+  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+
   pinMode(6, OUTPUT);
 }
 
 void processInput()
 {
-  #if !defined(DEBUG) && !defined(UNIT_TEST)
+  #if SERIAL_ALLOWED
   String input = Serial.readStringUntil('(');
 
   if (input.equals("setTask"))
   {
     String taskName = Serial.readStringUntil(')');
 
-    if (taskName.equalsIgnoreCase(normalTask.getName()))
-      currentTask = "Normal";
-    else if (taskName.equalsIgnoreCase(idleTask.getName()))
+    if (taskName.equalsIgnoreCase(idleTask.getName()))
       currentTask = "Idle";
     else if (taskName.equalsIgnoreCase(daTestTask.getName()))
       currentTask = "DATest";
     else
       Serial.println("No such registered task \'" + taskName + "\'");
   }
+  if (input.equals("getTime"))
+  {
+    String param = Serial.readStringUntil(')');
+
+    DateTime now = rtc.now();
+    Serial.println(now.toString("YYYY/MM/DD"));
+  }
   #endif
 }
 
 void executeCurrentTask()
 {
-  if (currentTask.equals("Normal"))
-    normalTask.run(deltaTime);
-  else if (currentTask.equals("Idle"))
+  if (currentTask.equals("Idle"))
     idleTask.run();
   else if (currentTask.equals("DATest"))
     daTestTask.run(deltaTime);
