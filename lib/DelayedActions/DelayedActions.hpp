@@ -7,6 +7,12 @@
   #define __ASSERT_USE_STDERR
 #endif
 
+#ifdef NATIVE_UNIT_TEST
+  #define F(x) x
+#else
+  #include <WString.h>
+#endif
+
 #include <assert.h>
 
 #include "Callback.hpp"
@@ -39,7 +45,7 @@ private:
 
   size_t nextAction = 0;
 
-  size_t findNextValidAction(size_t index) const;
+  size_t findNextValidAction(size_t index) const __attribute__ ((warn_unused_result));
 
   uint32_t timeElapsed = 0;
 };
@@ -65,7 +71,7 @@ void DelayedActions<actionsCount>::update(uint32_t deltaTime)
   {
     timeElapsed -= actionsDelay[nextAction];
 
-    assert(actions[nextAction] && "Reached impossible state, unexpected: callback is nullptr");
+    assert(actions[nextAction] && F("Reached impossible state, unexpected: callback is nullptr"));
     actions[nextAction]->invoke();
 
     nextAction = findNextValidAction(nextAction);
@@ -75,7 +81,7 @@ void DelayedActions<actionsCount>::update(uint32_t deltaTime)
 template<size_t actionsCount>
 void DelayedActions<actionsCount>::setAction(Callback* callback, uint32_t delayms, size_t index)
 {
-  assert(index < actionsCount && "Out-of-bound in DelayedActions<>::setAction");
+  assert(index < actionsCount && F("Out-of-bound in DelayedActions<>::setAction"));
   
   actions[index] = callback;
   actionsDelay[index] = delayms;
@@ -84,7 +90,7 @@ void DelayedActions<actionsCount>::setAction(Callback* callback, uint32_t delaym
 template<size_t actionsCount>
 void DelayedActions<actionsCount>::removeAction(size_t index)
 {
-  assert(index < actionsCount && "Out-of-bound in DelayedActions<>::removeAction");
+  assert(index < actionsCount && F("Out-of-bound in DelayedActions<>::removeAction"));
 
   actions[index] = nullptr;
 
@@ -95,7 +101,7 @@ void DelayedActions<actionsCount>::removeAction(size_t index)
 template<size_t actionsCount>
 Callback* DelayedActions<actionsCount>::getAction(size_t index) const
 {
-  assert(index < actionsCount && "Out-of-bound in DelayedActions<>::getAction");
+  assert(index < actionsCount && F("Out-of-bound in DelayedActions<>::getAction"));
 
   return actions[index]; 
 }
@@ -158,7 +164,7 @@ void DelayedActions<actionsCount>::setTurn(size_t index)
 template<size_t actionsCount>
 void DelayedActions<actionsCount>::setDelay(uint32_t delayms, size_t index)
 {
-  assert(index < actionsCount && "Out-of-bound in DelayedActions<>::setDelay");
+  assert(index < actionsCount && F("Out-of-bound in DelayedActions<>::setDelay"));
 
   actionsDelay[index] = delayms;
 }
@@ -166,7 +172,7 @@ void DelayedActions<actionsCount>::setDelay(uint32_t delayms, size_t index)
 template<size_t actionsCount>
 uint32_t DelayedActions<actionsCount>::getDelay(size_t index) const
 {
-  assert(index < actionsCount && "Out-of-bound in DelayedActions<>::getDelay");
+  assert(index < actionsCount && F("Out-of-bound in DelayedActions<>::getDelay"));
 
   return actionsDelay[index];
 }
