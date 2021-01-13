@@ -8,7 +8,7 @@ class Relay;
 class DATestTask : public Task
 {
 public:
-  DATestTask(Relay& relay, uint16_t ledPin);
+  DATestTask(uint8_t led1Pin, uint8_t led2Pin);
 
   void run(uint32_t deltaTime);
 
@@ -18,26 +18,15 @@ private:
   class CToggleLed : public Callback
   {
   public:
-    CToggleLed(uint16_t ledPin, uint8_t lastState = 0x0);
+    CToggleLed(uint8_t ledPin);
 
     void invoke() override;
 
   private:
-    uint16_t ledPin = 0;
-    uint8_t ledState = 0x0;
+    uint8_t ledPin = 0;
+    uint8_t ledState = 0;
   };
 
-  class CToggleRelay : public Callback
-  {
-  public:
-    CToggleRelay(Relay& relay);
-
-    void invoke() override;
-  
-  private:
-    Relay& relay;
-  };
-
-  CToggleRelay cToggleRelay;
-  CToggleLed cToggleLed;
+  CToggleLed cToggleLed1;
+  CToggleLed cToggleLed2;
 };
