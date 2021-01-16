@@ -12,81 +12,84 @@
 
 #include <assert.h>
 
-RepeatingAction::RepeatingAction(Callback* callback, uint32_t intervalms, bool overtimeCompensation)
+namespace tda
 {
-  setInterval(intervalms);
-  setAction(callback);
-  setOvertimeCompensation(overtimeCompensation);
-}
-
-RepeatingAction::RepeatingAction()
-{
-  setActive(false);
-}
-
-void RepeatingAction::update(uint32_t deltaTime)
-{
-  timeElapsed += deltaTime;
-
-  while (timeElapsed >= executionInterval)
+  RepeatingAction::RepeatingAction(Callback* callback, uint32_t intervalms, bool overtimeCompensation)
   {
-    // If callback invocation is ignored there's no need to do overtime compensation
-    if (overtimeCompensation && active)
-    {
-      timeElapsed -= executionInterval;
-    }
-    else
-    {
-      timeElapsed = timeElapsed % executionInterval;
-    }
-    
-    if (active && actionCallback)
-      actionCallback->invoke();
+    setInterval(intervalms);
+    setAction(callback);
+    setOvertimeCompensation(overtimeCompensation);
   }
-}
 
-void RepeatingAction::resetClock()
-{
-  timeElapsed = 0;
-}
+  RepeatingAction::RepeatingAction()
+  {
+    setActive(false);
+  }
 
-void RepeatingAction::setInterval(uint32_t intervalms)
-{
-  assert(intervalms > RA_MINIMUM_INTERVAL && F("Interval must be more than TA_MINIMUM_INTERVAL"));
-  executionInterval = intervalms;
-}
+  void RepeatingAction::update(uint32_t deltaTime)
+  {
+    timeElapsed += deltaTime;
 
-uint32_t RepeatingAction::getInterval() const
-{
-  return executionInterval;
-}
+    while (timeElapsed >= executionInterval)
+    {
+      // If callback invocation is ignored there's no need to do overtime compensation
+      if (overtimeCompensation && active)
+      {
+        timeElapsed -= executionInterval;
+      }
+      else
+      {
+        timeElapsed = timeElapsed % executionInterval;
+      }
+      
+      if (active && actionCallback)
+        actionCallback->invoke();
+    }
+  }
 
-void RepeatingAction::setActive(bool active)
-{
-  this->active = active;
-}
+  void RepeatingAction::resetClock()
+  {
+    timeElapsed = 0;
+  }
 
-bool RepeatingAction::isActive() const
-{
-  return active;
-}
+  void RepeatingAction::setInterval(uint32_t intervalms)
+  {
+    assert(intervalms > RA_MINIMUM_INTERVAL && F("Interval must be more than TA_MINIMUM_INTERVAL"));
+    executionInterval = intervalms;
+  }
 
-void RepeatingAction::setAction(Callback* callback)
-{
-  actionCallback = callback;
-}
+  uint32_t RepeatingAction::getInterval() const
+  {
+    return executionInterval;
+  }
 
-Callback* RepeatingAction::getAction() const
-{
-  return actionCallback;
-}
+  void RepeatingAction::setActive(bool active)
+  {
+    this->active = active;
+  }
 
-void RepeatingAction::setOvertimeCompensation(bool compensation)
-{
-  overtimeCompensation = compensation;
-}
+  bool RepeatingAction::isActive() const
+  {
+    return active;
+  }
 
-bool RepeatingAction::getOvertimeCompensation() const
-{
-  return overtimeCompensation;
+  void RepeatingAction::setAction(Callback* callback)
+  {
+    actionCallback = callback;
+  }
+
+  Callback* RepeatingAction::getAction() const
+  {
+    return actionCallback;
+  }
+
+  void RepeatingAction::setOvertimeCompensation(bool compensation)
+  {
+    overtimeCompensation = compensation;
+  }
+
+  bool RepeatingAction::getOvertimeCompensation() const
+  {
+    return overtimeCompensation;
+  }
 }
