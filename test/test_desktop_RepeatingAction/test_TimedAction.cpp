@@ -1,38 +1,40 @@
-#include "TimedAction.hpp"
+#include "RepeatingAction.hpp"
 #include "Callback.hpp"
 
 #include <unity.h>
 
+using namespace tda;
+
 void test_interval_modifier()
 {
-  TimedAction timedAction;
+  RepeatingAction repeatingAction;
 
-  timedAction.setInterval(3000);
-  TEST_ASSERT_EQUAL(3000, timedAction.getInterval());
+  repeatingAction.setInterval(3000);
+  TEST_ASSERT_EQUAL(3000, repeatingAction.getInterval());
 }
 
 void test_active_modifier()
 {
-  TimedAction timedAction;
+  RepeatingAction repeatingAction;
 
-  timedAction.setActive(true);
-  TEST_ASSERT_EQUAL(true, timedAction.isActive());
+  repeatingAction.setActive(true);
+  TEST_ASSERT_EQUAL(true, repeatingAction.isActive());
 }
 
 void test_overtimecompensation_modifier()
 {
-  TimedAction timedAction;
+  RepeatingAction repeatingAction;
 
-  timedAction.setOvertimeCompensation(false);
-  TEST_ASSERT_EQUAL(false, timedAction.getOvertimeCompensation());
+  repeatingAction.setOvertimeCompensation(false);
+  TEST_ASSERT_EQUAL(false, repeatingAction.getOvertimeCompensation());
 
-  timedAction.setOvertimeCompensation(true);
-  TEST_ASSERT_EQUAL(true, timedAction.getOvertimeCompensation());
+  repeatingAction.setOvertimeCompensation(true);
+  TEST_ASSERT_EQUAL(true, repeatingAction.getOvertimeCompensation());
 }
 
 void test_action_modifier()
 {
-  TimedAction timedAction;
+  RepeatingAction repeatingAction;
 
   class CDoNothing : public Callback
   {
@@ -44,14 +46,14 @@ void test_action_modifier()
 
   CDoNothing cDoNothing;
 
-  timedAction.setAction(&cDoNothing);
+  repeatingAction.setAction(&cDoNothing);
 
-  TEST_ASSERT_EQUAL(&cDoNothing, timedAction.getAction());
+  TEST_ASSERT_EQUAL(&cDoNothing, repeatingAction.getAction());
 }
 
 void test_action_execution()
 {
-  TimedAction timedAction;
+  RepeatingAction repeatingAction;
 
   class CIncrement : public Callback
   {
@@ -66,26 +68,26 @@ void test_action_execution()
   int executionCount = 0;
   CIncrement cIncrement(executionCount);
 
-  timedAction.setAction(&cIncrement);
-  timedAction.setInterval(2000);
-  timedAction.setActive(true);
+  repeatingAction.setAction(&cIncrement);
+  repeatingAction.setInterval(2000);
+  repeatingAction.setActive(true);
 
-  timedAction.update(1000);
+  repeatingAction.update(1000);
   TEST_ASSERT_EQUAL(0, executionCount);
 
-  timedAction.update(1000);
+  repeatingAction.update(1000);
   TEST_ASSERT_EQUAL(1, executionCount);
 
-  timedAction.update(1000);
+  repeatingAction.update(1000);
   TEST_ASSERT_EQUAL(1, executionCount);
 
-  timedAction.update(1000);
+  repeatingAction.update(1000);
   TEST_ASSERT_EQUAL(2, executionCount);
 }
 
 void test_overtimecompensation_behavior()
 {
-  TimedAction timedAction;
+  RepeatingAction repeatingAction;
 
   class CIncrement : public Callback
   {
@@ -100,40 +102,40 @@ void test_overtimecompensation_behavior()
   int executionCount = 0;
   CIncrement cIncrement(executionCount);
 
-  timedAction.setAction(&cIncrement);
-  timedAction.setInterval(2000);
-  timedAction.setActive(true);
+  repeatingAction.setAction(&cIncrement);
+  repeatingAction.setInterval(2000);
+  repeatingAction.setActive(true);
 
   // Default behavior, Overtime Compensation is activated
-  TEST_ASSERT_EQUAL(true, timedAction.getOvertimeCompensation());
+  TEST_ASSERT_EQUAL(true, repeatingAction.getOvertimeCompensation());
 
-  timedAction.update(4000);
+  repeatingAction.update(4000);
   TEST_ASSERT_EQUAL(2, executionCount);
 
-  timedAction.update(6000);
+  repeatingAction.update(6000);
   TEST_ASSERT_EQUAL(5, executionCount);
 
   // Overtime Compensation off
   executionCount = 0;
-  timedAction.setOvertimeCompensation(false);
+  repeatingAction.setOvertimeCompensation(false);
 
-  timedAction.update(100000);
+  repeatingAction.update(100000);
   TEST_ASSERT_EQUAL(1, executionCount);
 }
 
 void test_empty_constructed_behavior()
 {
-  TimedAction timedAction;
+  RepeatingAction repeatingAction;
 
-  TEST_ASSERT_EQUAL(false, timedAction.isActive());
-  TEST_ASSERT_EQUAL(nullptr, timedAction.getAction());
-  TEST_ASSERT_EQUAL(1000, timedAction.getInterval());
-  TEST_ASSERT_EQUAL(true, timedAction.getOvertimeCompensation());
+  TEST_ASSERT_EQUAL(false, repeatingAction.isActive());
+  TEST_ASSERT_EQUAL(nullptr, repeatingAction.getAction());
+  TEST_ASSERT_EQUAL(1000, repeatingAction.getInterval());
+  TEST_ASSERT_EQUAL(true, repeatingAction.getOvertimeCompensation());
 }
 
 void test_reset_clock()
 {
-  TimedAction timedAction;
+  RepeatingAction repeatingAction;
 
   class CIncrement : public Callback
   {
@@ -148,15 +150,15 @@ void test_reset_clock()
   int executionCount = 0;
   CIncrement cIncrement(executionCount);
 
-  timedAction.setAction(&cIncrement);
-  timedAction.setInterval(2000);
-  timedAction.setActive(true);
+  repeatingAction.setAction(&cIncrement);
+  repeatingAction.setInterval(2000);
+  repeatingAction.setActive(true);
 
-  timedAction.update(1900);
-  timedAction.resetClock();
+  repeatingAction.update(1900);
+  repeatingAction.resetClock();
   TEST_ASSERT_EQUAL(0, executionCount);
 
-  timedAction.update(2100);
+  repeatingAction.update(2100);
   TEST_ASSERT_EQUAL(1, executionCount);
 }
 
@@ -172,16 +174,16 @@ void test_full_constructed_behavior()
 
   CDoNothing cDoNothing;
 
-  TimedAction timedAction(&cDoNothing, 2000);
-  TEST_ASSERT_EQUAL(&cDoNothing, timedAction.getAction());
-  TEST_ASSERT_EQUAL(2000, timedAction.getInterval());
-  TEST_ASSERT_EQUAL(true, timedAction.isActive());
-  TEST_ASSERT_EQUAL(true, timedAction.getOvertimeCompensation());
+  RepeatingAction repeatingAction(&cDoNothing, 2000);
+  TEST_ASSERT_EQUAL(&cDoNothing, repeatingAction.getAction());
+  TEST_ASSERT_EQUAL(2000, repeatingAction.getInterval());
+  TEST_ASSERT_EQUAL(true, repeatingAction.isActive());
+  TEST_ASSERT_EQUAL(true, repeatingAction.getOvertimeCompensation());
 }
 
 void test_activeness()
 {
-  TimedAction timedAction;
+  RepeatingAction repeatingAction;
 
   class CIncrement : public Callback
   {
@@ -196,19 +198,19 @@ void test_activeness()
   int executionCount = 0;
   CIncrement cIncrement(executionCount);
 
-  timedAction.setAction(&cIncrement);
-  timedAction.setInterval(2000);
-  timedAction.setActive(false);
+  repeatingAction.setAction(&cIncrement);
+  repeatingAction.setInterval(2000);
+  repeatingAction.setActive(false);
 
-  timedAction.update(3000);
+  repeatingAction.update(3000);
   TEST_ASSERT_EQUAL(0, executionCount);
 
-  timedAction.setActive(true);
-  timedAction.update(1000);
+  repeatingAction.setActive(true);
+  repeatingAction.update(1000);
   TEST_ASSERT_EQUAL(1, executionCount);
 }
 
-int main(int argc, char **argv)
+int main()
 {
   UNITY_BEGIN();
   RUN_TEST(test_interval_modifier);

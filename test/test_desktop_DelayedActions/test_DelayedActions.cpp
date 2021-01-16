@@ -3,6 +3,8 @@
 
 #include <unity.h>
 
+using namespace tda;
+
 class CIncrement : public Callback
 {
 public:
