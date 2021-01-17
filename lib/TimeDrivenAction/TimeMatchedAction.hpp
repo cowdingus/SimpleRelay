@@ -23,35 +23,45 @@ namespace tda
   {
   public:
     TimeMatchedAction();
+    TimeMatchedAction(Callback* action, const DateTime& dateTime, MatchCriteria criteria);
 
-    void update(const DateTime& dateTime);
+    void update(const DateTime& previousTime, const DateTime& currentTime);
     
     void setAction(Callback* callback);
     Callback* getAction() const;
 
-    void setInvocationDate(const DateTime& dateTime, MatchCriteria matchCriteria);
+    void setInvocationDate(const DateTime& dateTime);
     const DateTime& getInvocationDate() const;
 
-    void setActive(bool active);
-    bool isActive() const;
+    void setMatchCriteria(MatchCriteria matchCriteria);
+    MatchCriteria getMatchCriteria() const;
 
-    void markAsComplete();
+    void setRepeat(bool repeat);
+    bool onRepeat() const;
+
+    void setComplete(bool complete);
+    bool isComplete() const;
 
   private:
     Callback* action = nullptr;
     MatchCriteria matchCriteria = MatchCriteria::Year;
     DateTime invocationTime = DateTime(2200, 12, 20, 23, 59, 59);
-    DateTime previousInvocationTime = DateTime(2200, 12, 20, 23, 59, 59);
 
     bool repeat = true;
     bool complete = false;
 
-    bool active = true;
+    bool isTimeToInvoke(const DateTime& previousTime, const DateTime& currentTime);
+    bool shouldInvoke(const DateTime& previousTime, const DateTime& currentTime);
 
-    bool isTimeToInvoke(const DateTime& currentTime);
-    bool shouldInvoke(const DateTime& currentTime);
-    void invokeAction(const DateTime& currentTime);
+    template<typename T>
+    bool inside(const T& value, const T& lowerBound, const T& upperBound);
   };
+
+  template<typename T>
+  bool TimeMatchedAction::inside(const T& value, const T& lowerBound, const T& upperBound)
+  {
+    return (lowerBound <= value) && (value <= upperBound);
+  }
 }
 
 #endif

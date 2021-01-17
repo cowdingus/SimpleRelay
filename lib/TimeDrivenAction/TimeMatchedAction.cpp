@@ -3,84 +3,137 @@
 #include "TimeMatchedAction.hpp"
 #include "Callback.hpp"
 
+#if !defined(DEBUG) && !defined(UNIT_TEST)
+  #define __ASSERT_USE_STDERR
+#endif
+
+#ifdef NATIVE_UNIT_TEST
+  #define F(x) x
+#else
+  #include <WString.h>
+#endif
+
+#include <assert.h>
+
 namespace tda
 {
-  bool TimeMatchedAction::isTimeToInvoke(const DateTime& currentDateTime)
+  TimeMatchedAction::TimeMatchedAction()
+    : complete(true)
   {
-    switch (matchCriteria)
+
+  }
+
+  TimeMatchedAction::TimeMatchedAction(Callback* callback, const DateTime& invocationDateTime, MatchCriteria criteria)
+  {
+    setAction(callback);
+    setInvocationDate(invocationDateTime);
+    setMatchCriteria(criteria);
+  }
+
+  void TimeMatchedAction::update(const DateTime& previousTime, const DateTime& currentTime)
+  {
+    if (shouldInvoke(previousTime, currentTime))
     {
-      case MatchCriteria::Year:
-      {
-        return currentDateTime.secondstime() >= invocationTime.secondstime();
-      }
-      case MatchCriteria::Month:
-      {
-        if (currentDateTime.month() > invocationTime.month())
-          return true;
-        if (currentDateTime.month() < invocationTime.month())
-          return false;
-      }
-      case MatchCriteria::DayOfMonth:
-      {
-        if (currentDateTime.day() > invocationTime.day())
-          return true;
-        if (currentDateTime.day() < invocationTime.day())
-          return false;
-      }
-      case MatchCriteria::DayOfWeek:
-      {
-        if (matchCriteria == MatchCriteria::DayOfWeek)
-        {
-          if (currentDateTime.dayOfTheWeek() > invocationTime.dayOfTheWeek())
-            return true;
-          if (currentDateTime.dayOfTheWeek() < invocationTime.dayOfTheWeek())
-            return false;
-        }
-      }
-      case MatchCriteria::Hour:
-      {
-        if (currentDateTime.hour() > invocationTime.hour())
-          return true;
-        if (currentDateTime.hour() < invocationTime.hour())
-          return false;
-      }
-      case MatchCriteria::Minute:
-      {
-        if (currentDateTime.minute() > invocationTime.minute())
-          return true;
-        if (currentDateTime.minute() < invocationTime.minute())
-          return false;
-      }
-      case MatchCriteria::Second:
-      {
-        return currentDateTime.second() >= invocationTime.second();
-      }
+      if (action)
+        action->invoke();
+
+      if (!repeat || matchCriteria == MatchCriteria::Year)
+        setComplete(true);
     }
   }
 
-  bool TimeMatchedAction::shouldInvoke(const DateTime& currentDateTime)
+  void TimeMatchedAction::setAction(Callback* callback)
   {
-    // If one of the date time operands is not valid just return false
-    if ((!invocationTime.isValid()) || (!currentDateTime.isValid()))
-      return false;
-
-    // Return false if task is already completed and task is not on repeat
-    if (complete && !repeat) return false;
-
-    // Mark complete to false if repeat is true
-    if (complete && repeat) complete = false;
-    
-    return !complete && isTimeToInvoke(currentDateTime);
+    action = callback;
   }
 
-  void TimeMatchedAction::invokeAction(const DateTime& currentTime)
+  Callback* TimeMatchedAction::getAction() const
   {
-    action->invoke();
+    return action;
+  }
 
-    previousInvocationTime = currentTime;
+  void TimeMatchedAction::setInvocationDate(const DateTime& dateTime)
+  {
+    invocationTime = dateTime;
+  }
 
-    if (!repeat)
-      markAsComplete();
+  const DateTime& TimeMatchedAction::getInvocationDate() const
+  {
+    return invocationTime;
+  }
+
+  void TimeMatchedAction::setMatchCriteria(MatchCriteria criteria)
+  {
+    matchCriteria = criteria;
+  }
+
+  MatchCriteria TimeMatchedAction::getMatchCriteria() const
+  {
+    return matchCriteria;
+  }
+
+  void TimeMatchedAction::setRepeat(bool repeat)
+  {
+    this->repeat = repeat;
+  }
+
+  bool TimeMatchedAction::onRepeat() const
+  {
+    return repeat;
+  }
+
+  void TimeMatchedAction::setComplete(bool complete)
+  {
+    this->complete = complete;
+  }
+
+  bool TimeMatchedAction::isComplete() const
+  {
+    return complete;
+  }
+
+  bool TimeMatchedAction::isTimeToInvoke(const DateTime& previousTime, const DateTime& currentTime)
+  {
+    switch(matchCriteria)
+    {
+      case MatchCriteria::Year:
+        return inside(invocationTime, previousTime, currentTime);
+      case MatchCriteria::Month:
+        if (!inside(invocationTime.month(), previousTime.month(), currentTime.month()))
+          return false;
+      case MatchCriteria::DayOfMonth:
+        if (!inside(invocationTime.day(), previousTime.day(), currentTime.day()))
+          return false;
+      case MatchCriteria::DayOfWeek:
+        // Skip in case of fall through
+        if (matchCriteria == MatchCriteria::DayOfWeek)
+        {
+          if (!inside(invocationTime.dayOfTheWeek(), previousTime.dayOfTheWeek(), currentTime.dayOfTheWeek()))
+            return false;
+        }
+      case MatchCriteria::Hour:
+        if (!inside(invocationTime.hour(), previousTime.hour(), currentTime.hour()))
+          return false;
+      case MatchCriteria::Minute:
+        if (!inside(invocationTime.minute(), previousTime.minute(), currentTime.minute()))
+          return false;
+      case MatchCriteria::Second:
+        return inside(invocationTime.second(), previousTime.second(), currentTime.second());
+    }
+
+    assert(false && F("Reached impossible state at TimeMatchedAction::isTimeToInvoke()"));
+    return false;
+  }
+
+  bool TimeMatchedAction::shouldInvoke(const DateTime& previousTime, const DateTime& currentTime)
+  {
+    // If one of the date time operands is not valid just return false
+    if ((!invocationTime.isValid()) || (!previousTime.isValid()) || (!currentTime.isValid()))
+      return false;
+
+    if (complete) return false;
+    
+    return isTimeToInvoke(previousTime, currentTime);
   }
 }
 
