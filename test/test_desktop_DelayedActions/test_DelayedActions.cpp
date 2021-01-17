@@ -168,7 +168,7 @@ void test_remove_action()
   TEST_ASSERT_EQUAL(nullptr, delayedActions.getAction(1));
 }
 
-int main(int argc, char **argv)
+int main()
 {
   UNITY_BEGIN();
   RUN_TEST(test_set_action);
