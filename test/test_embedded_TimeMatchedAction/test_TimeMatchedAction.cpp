@@ -75,7 +75,7 @@ void test_match_criteria_month()
 
   tma.update(DateTime(2000, 2, 15, 12, 29, 20), DateTime(2000, 2, 15, 12, 31, 10));
 
-  TEST_ASSERT_EQUAL(1, x);
+  TEST_ASSERT_TRUE(x == 1);
 }
 
 void setup() {
