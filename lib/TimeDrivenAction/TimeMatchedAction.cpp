@@ -112,12 +112,22 @@ namespace tda
           // Note that currentTime can't be less / lower than invocationTime because that wouldn't pass
           // the `inside` if statement, that's why I ommited that check.
         }
+        else // Return false if invocationTime is not inside of the deltaTime (previousTime and currentTime)
+        {
+          return false;
+        }
+        
       case MatchCriteria::DayOfMonth:
         if (inside(invocationTime.day(), previousTime.day(), currentTime.day()))
         {
           if (currentTime.day() > invocationTime.day())
             return true;
         }
+        else
+        {
+          return false;
+        }
+        
       case MatchCriteria::DayOfWeek:
         // Skip in case of fall through, because day of week can be different on each year / month
         if (matchCriteria == MatchCriteria::DayOfWeek)
@@ -127,6 +137,10 @@ namespace tda
             if (currentTime.dayOfTheWeek() > invocationTime.dayOfTheWeek())
               return true;
           }
+          else
+          {
+            return false;
+          }
         }
       case MatchCriteria::Hour:
         if (inside(invocationTime.hour(), previousTime.hour(), currentTime.hour()))
@@ -134,12 +148,22 @@ namespace tda
           if (currentTime.hour() > invocationTime.hour())
             return true;
         }
+        else
+        {
+          return false;
+        }
+        
       case MatchCriteria::Minute:
         if (inside(invocationTime.minute(), previousTime.minute(), currentTime.minute()))
         {
           if (currentTime.minute() > invocationTime.minute())
             return true;
         }
+        else
+        {
+          return false;
+        }
+        
       case MatchCriteria::Second:
         // There's no need to do any fallthrough checks here, it's already the end.
         return inside(invocationTime.second(), previousTime.second(), currentTime.second());
