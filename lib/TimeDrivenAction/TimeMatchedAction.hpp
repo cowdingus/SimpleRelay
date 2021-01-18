@@ -45,7 +45,7 @@ namespace tda
   private:
     Callback* action = nullptr;
     MatchCriteria matchCriteria = MatchCriteria::Year;
-    DateTime invocationTime = DateTime(2200, 12, 20, 23, 59, 59);
+    DateTime invocationTime = DateTime(0, 0, 0, 0, 0, 0);
 
     bool repeat = true;
     bool complete = false;
