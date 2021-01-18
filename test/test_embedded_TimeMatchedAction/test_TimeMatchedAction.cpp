@@ -104,6 +104,84 @@ void test_match_criteria_month()
   TEST_ASSERT_TRUE(x == 2);
 }
 
+void test_criteria_day_of_month()
+{
+  int x = 0;
+  CIncrement incrementer(x);
+
+  TimeMatchedAction tma;
+  tma.setAction(&incrementer);
+  tma.setMatchCriteria(MatchCriteria::DayOfMonth);
+  tma.setInvocationDate(DateTime(2011, 2, 15, 12, 30, 30));
+  tma.setComplete(false);
+
+  // Day of month matches invocation time
+  tma.update(DateTime(1, 1, 15, 12, 30, 30), DateTime(2, 2, 15, 13, 30, 10));
+
+  TEST_ASSERT_TRUE(x == 1);
+  
+  // Day of month matches invocation time
+  tma.update(DateTime(3, 1, 15, 10, 30, 20), DateTime(6, 3, 15, 13, 30, 10));
+
+  TEST_ASSERT_TRUE(x == 2);
+
+  // Day of month doesn't match the invocation time (not yet)
+  tma.update(DateTime(3, 4, 12, 14, 30, 30), DateTime(4, 5, 13, 16, 30, 30));
+
+  TEST_ASSERT_TRUE(x == 2);
+
+  // Day of month doesn't match the invocation time (in the future)
+  tma.update(DateTime(1, 6, 16, 12, 30, 30), DateTime(5, 7, 17, 12, 30, 30));
+
+  TEST_ASSERT_TRUE(x == 2);
+
+  // Day of month matches the invocation time but its subunits doesn't match (not yet)
+  tma.update(DateTime(2, 6, 15, 10, 30, 30), DateTime(6, 7, 15, 11, 30, 59));
+
+  TEST_ASSERT_TRUE(x == 2);
+
+  // Day of month matches the invocation time but its subunits doesn't match (in the future)
+  tma.update(DateTime(2, 6, 15, 13, 30, 20), DateTime(7, 7, 15, 14, 30, 20));
+
+  TEST_ASSERT_TRUE(x == 2);
+}
+
+void test_modifiers_and_intialization_state()
+{
+  TimeMatchedAction tma;
+  TEST_ASSERT_TRUE(tma.isComplete());
+  TEST_ASSERT_TRUE(tma.onRepeat());
+  TEST_ASSERT_FALSE(tma.getInvocationDate().isValid());
+
+  int x = 0;
+  CIncrement incrementer(x);
+
+  tma.setAction(&incrementer);
+  TEST_ASSERT_EQUAL(&incrementer, tma.getAction());
+
+  tma.setComplete(false);
+  TEST_ASSERT_FALSE(tma.isComplete());
+
+  tma.setMatchCriteria(MatchCriteria::Month);
+  TEST_ASSERT_EQUAL(MatchCriteria::Month, tma.getMatchCriteria());
+
+  tma.setInvocationDate(DateTime(2000, 10, 10, 10, 10, 10));
+  TEST_ASSERT_TRUE(DateTime(2000, 10, 10, 10, 10, 10) == tma.getInvocationDate());
+
+  tma.setRepeat(false);
+  TEST_ASSERT_FALSE(tma.onRepeat());
+
+  tma.setRepeat(true);
+  TEST_ASSERT_TRUE(tma.onRepeat());
+
+  TimeMatchedAction tma_full(&incrementer, DateTime(2000, 2, 2, 2, 2, 2), MatchCriteria::Month);
+  TEST_ASSERT_EQUAL_PTR(&incrementer, tma_full.getAction());
+  TEST_ASSERT_TRUE(DateTime(2000, 2, 2, 2, 2, 2) == tma_full.getInvocationDate());
+  TEST_ASSERT_EQUAL(MatchCriteria::Month, tma_full.getMatchCriteria());
+  TEST_ASSERT_FALSE(tma_full.isComplete());
+  TEST_ASSERT_TRUE(tma_full.onRepeat());
+}
+
 void setup() {
   // NOTE!!! Wait for >2 secs
   // if board doesn't support software reset via Serial.DTR/RTS
@@ -112,6 +190,8 @@ void setup() {
   UNITY_BEGIN();
   RUN_TEST(test_match_criteria_year);
   RUN_TEST(test_match_criteria_month);
+  RUN_TEST(test_criteria_day_of_month);
+  RUN_TEST(test_modifiers_and_intialization_state);
   UNITY_END();
 }
 
