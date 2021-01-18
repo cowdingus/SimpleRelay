@@ -70,12 +70,38 @@ void test_match_criteria_month()
   TimeMatchedAction tma;
   tma.setAction(&incrementer);
   tma.setMatchCriteria(MatchCriteria::Month);
-  tma.setInvocationDate(DateTime(2000, 2, 15, 12, 30, 30));
+  tma.setInvocationDate(DateTime(2011, 2, 15, 12, 30, 30));
   tma.setComplete(false);
 
-  tma.update(DateTime(2000, 2, 15, 12, 29, 20), DateTime(2000, 2, 15, 12, 31, 10));
+  // Month matches invocation date
+  tma.update(DateTime(0, 2, 15, 12, 29, 20), DateTime(0, 2, 15, 12, 31, 10));
 
   TEST_ASSERT_TRUE(x == 1);
+
+  // Month doesn't match invocation date (not yet)
+  tma.update(DateTime(0, 1, 15, 12, 29, 20), DateTime(0, 1, 16, 12, 31, 10));
+
+  TEST_ASSERT_TRUE(x == 1);
+
+  // Month doesn't match invocation date (in the future)
+  tma.update(DateTime(0, 5, 15, 12, 29, 20), DateTime(0, 6, 15, 12, 31, 10));
+
+  TEST_ASSERT_TRUE(x == 1);
+
+  // Month matches invocation date but subunits doesn't match the invocation date (Not yet)
+  tma.update(DateTime(0, 2, 13, 12, 30, 30), DateTime(0, 2, 14, 12, 30, 30));
+
+  TEST_ASSERT_TRUE(x == 1);
+
+  // Month matches invocation date but subunits doesn't match the invocation date (In the future)
+  tma.update(DateTime(0, 2, 16, 12, 30, 30), DateTime(0, 2, 17, 12, 30, 30));
+
+  TEST_ASSERT_TRUE(x == 1);
+
+  // Month matches invocation date (again)
+  tma.update(DateTime(0, 2, 15, 12, 29, 20), DateTime(0, 2, 15, 12, 31, 10));
+
+  TEST_ASSERT_TRUE(x == 2);
 }
 
 void setup() {
