@@ -121,7 +121,7 @@ void test_criteria_day_of_month()
   TEST_ASSERT_TRUE(x == 1);
   
   // Day of month matches invocation time
-  tma.update(DateTime(3, 1, 15, 10, 30, 20), DateTime(6, 3, 15, 13, 30, 10));
+  tma.update(DateTime(3, 5, 15, 10, 30, 20), DateTime(6, 5, 15, 13, 30, 10));
 
   TEST_ASSERT_TRUE(x == 2);
 
@@ -143,6 +143,114 @@ void test_criteria_day_of_month()
   // Day of month matches the invocation time but its subunits doesn't match (in the future)
   tma.update(DateTime(2, 6, 15, 13, 30, 20), DateTime(7, 7, 15, 14, 30, 20));
 
+  TEST_ASSERT_TRUE(x == 2);
+}
+
+void test_criteria_day_of_week()
+{
+  int x = 0;
+  CIncrement incrementer(x);
+
+  TimeMatchedAction tma;
+  tma.setAction(&incrementer);
+  tma.setMatchCriteria(MatchCriteria::DayOfWeek);
+  tma.setInvocationDate(DateTime(2011, 2, 15, 12, 30, 30));
+  tma.setComplete(false);
+
+  // Day of week matches invocation time (in the past)
+  tma.update(DateTime(2010, 1, 19, 12, 30, 30), DateTime(2010, 1, 19, 13, 20, 10));
+
+  TEST_ASSERT_TRUE(x == 1);
+
+  // Day of week matches invocation time (in the future)
+  tma.update(DateTime(2012, 1, 24, 12, 30, 30), DateTime(2012, 1, 24, 12, 30, 30));
+
+  TEST_ASSERT_TRUE(x == 2);
+
+  // Day of week matches invocation time (in the future)
+  tma.update(DateTime(2012, 1, 25, 12, 30, 30), DateTime(2012, 1, 26, 13, 20, 10));
+
+  TEST_ASSERT_TRUE(x == 3);
+
+  // Day of week doesn't match invocation time (in the past)
+  tma.update(DateTime(2012, 1, 20, 12, 30, 30), DateTime(2012, 1, 21, 13, 20, 10));
+
+  TEST_ASSERT_TRUE(x == 3);
+
+  // Day of week doesn't match invocation time (in the future) (exact different)
+  tma.update(DateTime(2012, 1, 23, 12, 30, 30), DateTime(2012, 1, 24, 12, 30, 30));
+
+  TEST_ASSERT_TRUE(x == 3);
+}
+
+void test_invocation_criteria_hour()
+{
+  int x = 0;
+  CIncrement incrementer(x);
+
+  TimeMatchedAction tma;
+  tma.setAction(&incrementer);
+  tma.setMatchCriteria(MatchCriteria::Hour);
+  tma.setInvocationDate(DateTime(2011, 2, 15, 12, 30, 30));
+  tma.setComplete(false);
+
+  // Hour matches the invocation date (exact match)
+  tma.update(DateTime(1, 1, 1, 12, 30, 30), DateTime(1, 1, 1, 12, 30, 30));
+
+  TEST_ASSERT_TRUE(x == 1);
+
+  // Hour matches the invocation date
+  tma.update(DateTime(1, 1, 1, 12, 16, 20), DateTime(1, 1, 2, 10, 45, 10));
+
+  TEST_ASSERT_TRUE(x == 2);
+
+  // Hour matches the invocation date but subunits doesn't match (in the future)
+  tma.update(DateTime(1, 1, 1, 12, 30, 31), DateTime(1, 1, 1, 12, 30, 32));
+
+  TEST_ASSERT_TRUE(x == 2);
+
+  // Hour matches the invocation date but subunits doesn't match (in the past)
+  tma.update(DateTime(1, 1, 1, 12, 29, 30), DateTime(1, 1, 1, 12, 29, 59));
+
+  TEST_ASSERT_TRUE(x == 2);
+
+  // Hour doesn't match the invocation date (in the future)
+  tma.update(DateTime(1, 1, 1, 13, 30, 31), DateTime(1, 1, 1, 13, 30, 32));
+
+  TEST_ASSERT_TRUE(x == 2);
+}
+
+void test_invocation_criteria_second()
+{
+  int x = 0;
+  CIncrement incrementer(x);
+
+  TimeMatchedAction tma;
+  tma.setAction(&incrementer);
+  tma.setMatchCriteria(MatchCriteria::Second);
+  tma.setInvocationDate(DateTime(2011, 2, 15, 12, 30, 30));
+  tma.setComplete(false);
+
+  // Exact match
+  tma.update(DateTime(1, 1, 1, 1, 1, 30), DateTime(1, 1, 1, 1, 1, 30));
+  TEST_ASSERT_TRUE(x == 1);
+
+  // Matches
+  tma.update(DateTime(1, 1, 1, 1, 1, 29), DateTime(1, 1, 1, 1, 1, 31));
+  TEST_ASSERT_TRUE(x == 2);
+
+  // Doesn't match (future) (exact)
+  tma.update(DateTime(1, 1, 1, 1, 1, 31), DateTime(1, 1, 1, 1, 1, 31));
+
+  // Doesn't match (in the past) (exact)
+  tma.update(DateTime(1, 1, 1, 1, 1, 29), DateTime(1, 1, 1, 1, 1, 29));
+
+  // Doesn't match (future)
+  tma.update(DateTime(1, 1, 1, 1, 1, 31), DateTime(1, 1, 1, 1, 1, 32));
+
+  // Doesn't match (in the past)
+  tma.update(DateTime(1, 1, 1, 1, 1, 28), DateTime(1, 1, 1, 1, 1, 29));
+  
   TEST_ASSERT_TRUE(x == 2);
 }
 
@@ -191,6 +299,9 @@ void setup() {
   RUN_TEST(test_match_criteria_year);
   RUN_TEST(test_match_criteria_month);
   RUN_TEST(test_criteria_day_of_month);
+  RUN_TEST(test_criteria_day_of_week);
+  RUN_TEST(test_invocation_criteria_hour);
+  RUN_TEST(test_invocation_criteria_second);
   RUN_TEST(test_modifiers_and_intialization_state);
   UNITY_END();
 }
