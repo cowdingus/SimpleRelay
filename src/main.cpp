@@ -32,6 +32,15 @@ uint32_t previousTime = 0;
 uint32_t timeNow = 0;
 uint32_t deltaTime = timeNow - previousTime;
 
+DateTime previousDate = DateTime();
+DateTime dateNow = DateTime();
+TimeSpan deltaDate = dateNow - previousDate;
+
+const uint8_t relayPin1 = 2;
+const uint8_t relayPin2 = 3;
+
+RTC_DS3231 rtc;
+
 void setup() 
 {
   #if SERIAL_ALLOWED
@@ -41,6 +50,27 @@ void setup()
   #ifdef DEBUG
   debug_init();
   #endif
+
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  if (!rtc.begin())
+  {
+    while (true)
+    {
+      delay(300);
+      digitalWrite(LED_BUILTIN, HIGH);
+      delay(300);
+      digitalWrite(LED_BUILTIN, LOW);
+    }
+  }
+
+  if (rtc.lostPower())
+  {
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  }
+
+  pinMode(relayPin1, OUTPUT);
+  pinMode(relayPin2, OUTPUT);
 }
 
 void updateDeltaTime()
@@ -48,6 +78,12 @@ void updateDeltaTime()
   previousTime = timeNow;
   timeNow = millis();
   deltaTime = timeNow - previousTime;
+}
+
+void updateDeltaDate()
+{
+  previousDate = dateNow;
+  dateNow;
 }
 
 void loop()
