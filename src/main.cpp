@@ -32,6 +32,10 @@ uint32_t previousTime = 0;
 uint32_t timeNow = 0;
 uint32_t deltaTime = timeNow - previousTime;
 
+DateTime previousDate = DateTime();
+DateTime dateNow = DateTime();
+TimeSpan deltaDate = dateNow - previousDate;
+
 void setup() 
 {
   #if SERIAL_ALLOWED
@@ -50,7 +54,15 @@ void updateDeltaTime()
   deltaTime = timeNow - previousTime;
 }
 
+void updateDeltaDate()
+{
+  previousDate = dateNow;
+  dateNow = RTC_DS1307::now();
+  deltaDate = dateNow - previousDate;
+}
+
 void loop()
 {
   updateDeltaTime();
+  updateDeltaDate();
 }
