@@ -15,6 +15,8 @@
 
 #include <assert.h>
 
+#warning "TMA is still experimental, a lot of the techniques used still contains bug, don't use it in production code."
+
 namespace tda
 {
   TimeMatchedAction::TimeMatchedAction()
