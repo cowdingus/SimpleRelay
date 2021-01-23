@@ -1,7 +1,5 @@
 #ifndef NATIVE_UNIT_TEST
 
-#pragma once
-
 #include "AlarmAction.hpp"
 
 namespace tda
