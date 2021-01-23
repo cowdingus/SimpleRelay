@@ -4,7 +4,7 @@
   #define __ASSERT_USE_STDERR
 #endif
 
-#include "RepeatingAction.hpp"
+#include "RepeatingAction_Millis.hpp"
 
 #include <RTClib.h>
 #include <Arduino.h>
