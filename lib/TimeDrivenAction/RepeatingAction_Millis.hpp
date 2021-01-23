@@ -4,15 +4,15 @@
 
 #include <stdint.h>
 
-#define RA_MINIMUM_INTERVAL 25
+#define RAMS_MINIMUM_INTERVAL 25
 
 namespace tda
 {
-  class RepeatingAction
+  class RepeatingAction_Millis
   {
   public:
-    RepeatingAction(Callback* callback, uint32_t intervalms, bool overtimeCompensation = true);
-    RepeatingAction();
+    RepeatingAction_Millis(Callback* callback, uint32_t intervalms, bool overtimeCompensation = true);
+    RepeatingAction_Millis();
 
     void update(uint32_t elapsedTime);
     void resetClock();

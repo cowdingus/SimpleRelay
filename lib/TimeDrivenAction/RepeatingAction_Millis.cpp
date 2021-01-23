@@ -1,4 +1,4 @@
-#include "RepeatingAction.hpp"
+#include "RepeatingAction_Millis.hpp"
 
 #if !defined(DEBUG) && !defined(UNIT_TEST)
   #define __ASSERT_USE_STDERR
@@ -14,19 +14,19 @@
 
 namespace tda
 {
-  RepeatingAction::RepeatingAction(Callback* callback, uint32_t intervalms, bool overtimeCompensation)
+  RepeatingAction_Millis::RepeatingAction_Millis(Callback* callback, uint32_t intervalms, bool overtimeCompensation)
   {
     setInterval(intervalms);
     setAction(callback);
     setOvertimeCompensation(overtimeCompensation);
   }
 
-  RepeatingAction::RepeatingAction()
+  RepeatingAction_Millis::RepeatingAction_Millis()
   {
     setActive(false);
   }
 
-  void RepeatingAction::update(uint32_t deltaTime)
+  void RepeatingAction_Millis::update(uint32_t deltaTime)
   {
     timeElapsed += deltaTime;
 
@@ -47,48 +47,48 @@ namespace tda
     }
   }
 
-  void RepeatingAction::resetClock()
+  void RepeatingAction_Millis::resetClock()
   {
     timeElapsed = 0;
   }
 
-  void RepeatingAction::setInterval(uint32_t intervalms)
+  void RepeatingAction_Millis::setInterval(uint32_t intervalms)
   {
-    assert(intervalms > RA_MINIMUM_INTERVAL && F("Interval must be more than TA_MINIMUM_INTERVAL"));
+    assert(intervalms > RAMS_MINIMUM_INTERVAL && F("Interval must be more than TA_MINIMUM_INTERVAL"));
     executionInterval = intervalms;
   }
 
-  uint32_t RepeatingAction::getInterval() const
+  uint32_t RepeatingAction_Millis::getInterval() const
   {
     return executionInterval;
   }
 
-  void RepeatingAction::setActive(bool active)
+  void RepeatingAction_Millis::setActive(bool active)
   {
     this->active = active;
   }
 
-  bool RepeatingAction::isActive() const
+  bool RepeatingAction_Millis::isActive() const
   {
     return active;
   }
 
-  void RepeatingAction::setAction(Callback* callback)
+  void RepeatingAction_Millis::setAction(Callback* callback)
   {
     actionCallback = callback;
   }
 
-  Callback* RepeatingAction::getAction() const
+  Callback* RepeatingAction_Millis::getAction() const
   {
     return actionCallback;
   }
 
-  void RepeatingAction::setOvertimeCompensation(bool compensation)
+  void RepeatingAction_Millis::setOvertimeCompensation(bool compensation)
   {
     overtimeCompensation = compensation;
   }
 
-  bool RepeatingAction::getOvertimeCompensation() const
+  bool RepeatingAction_Millis::getOvertimeCompensation() const
   {
     return overtimeCompensation;
   }
