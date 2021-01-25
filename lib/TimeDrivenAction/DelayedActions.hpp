@@ -33,6 +33,9 @@ namespace tda
     void setPause(bool pause);
     bool isPaused() const;
 
+    void setRepeat(bool repeat);
+    bool onRepeat() const;
+
     void resetClock();
 
     void setAction(Callback* callback, uint32_t delayms, size_t index);
@@ -51,8 +54,10 @@ namespace tda
     size_t nextAction = 0;
 
     bool onPause = false;
+    bool repeat = true;
 
     size_t findNextValidAction(size_t index) const __attribute__ ((warn_unused_result));
+    bool isOnLastTurn() const;
 
     uint32_t timeElapsed = 0;
   };
@@ -80,6 +85,8 @@ namespace tda
 
       assert(actions[nextAction] && F("Reached impossible state, unexpected: callback is nullptr"));
       actions[nextAction]->invoke();
+
+      if (isOnLastTurn() && !onRepeat()) setPause(true); 
 
       nextAction = findNextValidAction(nextAction);
     }
@@ -126,6 +133,18 @@ namespace tda
   }
 
   template<size_t actionsCount>
+  void DelayedActions<actionsCount>::setRepeat(bool repeat)
+  {
+    this->repeat = repeat;
+  }
+
+  template<size_t actionsCount>
+  bool DelayedActions<actionsCount>::onRepeat() const
+  {
+    return repeat;
+  }
+
+  template<size_t actionsCount>
   void DelayedActions<actionsCount>::resetClock()
   {
     timeElapsed = 0;
@@ -143,6 +162,13 @@ namespace tda
     }
 
     return currentIndex;
+  }
+
+  template<size_t actionsCount>
+  bool DelayedActions<actionsCount>::isOnLastTurn() const
+  {
+    if (findNextValidAction(nextAction) < nextAction)
+      return true;
   }
 
   template<size_t actionsCount>
