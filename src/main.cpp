@@ -137,12 +137,6 @@ void setup()
   alarmAction.setActive(true);
 }
 
-void updateDeltaDate()
-{
-  previousDate = dateNow;
-  dateNow;
-}
-
 void loop()
 {
   updateDeltaTime();
