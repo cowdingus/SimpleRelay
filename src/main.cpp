@@ -4,7 +4,8 @@
   #define __ASSERT_USE_STDERR
 #endif
 
-#include "RepeatingAction.hpp"
+#include "AlarmAction.hpp"
+#include "DelayedActions.hpp"
 
 #include <RTClib.h>
 #include <Arduino.h>
@@ -36,42 +37,54 @@ DateTime previousDate = DateTime();
 DateTime dateNow = DateTime();
 TimeSpan deltaDate = dateNow - previousDate;
 
-const uint8_t relayPin1 = 2;
-const uint8_t relayPin2 = 3;
-
 RTC_DS3231 rtc;
 
-void setup() 
+class TogglePin : public tda::Callback
 {
-  #if SERIAL_ALLOWED
-  Serial.begin(9600);
-  #endif
+public:
+  TogglePin(const uint8_t pin)
+    : pin(pin)
+  {
+    pinMode(pin, OUTPUT);
+    digitalWrite(pin, LOW);
+  }
+
+  void invoke() override
+  {
+    digitalWrite(pin, !digitalRead(pin));
+    Serial.write("Relay Toggled\n");
+  }
+
+private:
+  const uint8_t pin;
+};
+
+class InvokeFunction : public tda::Callback
+{
+public:
+  InvokeFunction(void (*function)())
+    : function(function)
+  {
+    
+  }
+
+  void invoke() override
+  {
+    if (function)
+      function();
+  }
+
+private:
+  void (*function)() = nullptr;
+};
+
+void activateWateringSequence()
+{
   
-  #ifdef DEBUG
-  debug_init();
-  #endif
-
-  pinMode(LED_BUILTIN, OUTPUT);
-
-  if (!rtc.begin())
-  {
-    while (true)
-    {
-      delay(300);
-      digitalWrite(LED_BUILTIN, HIGH);
-      delay(300);
-      digitalWrite(LED_BUILTIN, LOW);
-    }
-  }
-
-  if (rtc.lostPower())
-  {
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-  }
-
-  pinMode(relayPin1, OUTPUT);
-  pinMode(relayPin2, OUTPUT);
 }
+
+tda::AlarmAction alarmAction;
+TogglePin toggleRelay(2);
 
 void updateDeltaTime()
 {
@@ -83,10 +96,57 @@ void updateDeltaTime()
 void updateDeltaDate()
 {
   previousDate = dateNow;
+  dateNow = rtc.now();
+  deltaDate = dateNow - previousDate;
+}
+
+void setup() 
+{
+  #if SERIAL_ALLOWED
+  Serial.begin(9600);
+  Serial.write("Serial: Test");
+  #endif
+  
+  #ifdef DEBUG
+  debug_init();
+  #endif
+
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+
+  while (!rtc.begin())
+  {
+    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    delay(200);
+  }
+
+  if (rtc.lostPower())
+  {
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  }
+
+  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+
+  Serial.write(rtc.now().timestamp().c_str());
+
+  updateDeltaTime();
+  updateDeltaDate();
+
+  alarmAction.setAction(&toggleRelay);
+  tda::setAtHour(12, dateNow, alarmAction);
+  alarmAction.setActive(true);
+}
+
+void updateDeltaDate()
+{
+  previousDate = dateNow;
   dateNow;
 }
 
 void loop()
 {
   updateDeltaTime();
+  updateDeltaDate();
+
+  alarmAction.update(dateNow);
 }
