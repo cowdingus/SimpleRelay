@@ -30,6 +30,9 @@ namespace tda
     void setTurn(size_t index);
     size_t getTurn() const;
 
+    void setPause(bool pause);
+    bool isPaused() const;
+
     void resetClock();
 
     void setAction(Callback* callback, uint32_t delayms, size_t index);
@@ -47,6 +50,8 @@ namespace tda
 
     size_t nextAction = 0;
 
+    bool onPause = false;
+
     size_t findNextValidAction(size_t index) const __attribute__ ((warn_unused_result));
 
     uint32_t timeElapsed = 0;
@@ -61,7 +66,7 @@ namespace tda
   template<size_t actionsCount>
   void DelayedActions<actionsCount>::update(uint32_t deltaTime)
   {
-    if (isEmpty()) return;
+    if (onPause || isEmpty()) return;
 
     // Go directly to least valid action when current is not valid
     if (!actions[nextAction])
@@ -106,6 +111,18 @@ namespace tda
     assert(index < actionsCount && F("Out-of-bound in DelayedActions<>::getAction"));
 
     return actions[index]; 
+  }
+
+  template<size_t actionsCount>
+  void DelayedActions<actionsCount>::setPause(bool pause)
+  {
+    onPause = pause;
+  }
+
+  template<size_t actionsCount>
+  bool DelayedActions<actionsCount>::isPaused() const
+  {
+    return onPause;
   }
 
   template<size_t actionsCount>
