@@ -39,26 +39,6 @@ TimeSpan deltaDate = dateNow - previousDate;
 
 RTC_DS3231 rtc;
 
-class TogglePin : public tda::Callback
-{
-public:
-  TogglePin(const uint8_t pin)
-    : pin(pin)
-  {
-    pinMode(pin, OUTPUT);
-    digitalWrite(pin, LOW);
-  }
-
-  void invoke() override
-  {
-    digitalWrite(pin, !digitalRead(pin));
-    Serial.write("Relay Toggled\n");
-  }
-
-private:
-  const uint8_t pin;
-};
-
 class InvokeFunction : public tda::Callback
 {
 public:
@@ -78,13 +58,40 @@ private:
   void (*function)() = nullptr;
 };
 
-void activateWateringSequence()
-{
-  
-}
+const uint8_t wateringRelay = 4;
 
 tda::AlarmAction alarmAction;
-TogglePin toggleRelay(2);
+tda::DelayedActions<3> wateringSequence;
+
+TimeSpan wateringDuration = TimeSpan(10);
+
+void startWateringSequence()
+{
+  wateringSequence.setPause(false);
+  Serial.write("Watering sequence started \n");
+}
+InvokeFunction cStartWateringLoop(startWateringSequence);
+
+void endWateringSequence()
+{
+  wateringSequence.setPause(true);
+  Serial.write("Watering sequence stopped\n");
+}
+InvokeFunction cBreakWateringLoop(endWateringSequence);
+
+void openWateringRelay()
+{
+  digitalWrite(wateringRelay, HIGH);
+  Serial.write("Watering relay opened\n");
+}
+InvokeFunction cOpenWateringRelay(openWateringRelay);
+
+void closeWateringRelay()
+{
+  digitalWrite(wateringRelay, LOW);
+  Serial.write("Watering relay closed\n");
+}
+InvokeFunction cCloseWateringRelay(closeWateringRelay);
 
 void updateDeltaTime()
 {
@@ -132,9 +139,15 @@ void setup()
   updateDeltaTime();
   updateDeltaDate();
 
-  alarmAction.setAction(&toggleRelay);
-  tda::setAtHour(12, dateNow, alarmAction);
+  pinMode(wateringRelay, OUTPUT);
+
+  alarmAction.setAction(&cStartWateringLoop);
+  tda::setAtHour(11, dateNow, alarmAction);
   alarmAction.setActive(true);
+
+  wateringSequence.setAction(&cOpenWateringRelay, 50, 0);
+  wateringSequence.setAction(&cCloseWateringRelay, 10000, 1);
+  wateringSequence.setAction(&cBreakWateringLoop, 50, 2);
 }
 
 void loop()
@@ -143,4 +156,5 @@ void loop()
   updateDeltaDate();
 
   alarmAction.update(dateNow);
+  wateringSequence.update(deltaTime);
 }
